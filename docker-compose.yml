@@ -1,0 +1,24 @@
+services:
+  caddy:
+    image: caddy:2.10.0-alpine
+    init: true
+    volumes:
+      - ./proxy/Caddyfile:/etc/caddy/Caddyfile
+      - ./proxy/data:/data
+      - ./proxy/config:/config
+      - ./proxy/public:/srv
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      LE_EMAIL: $LE_EMAIL
+      URLS: $URLS
+    restart: on-failure
+  farm:
+    image: dobbs/farm:1.1.1
+    init: true
+    volumes:
+      - ./farm/.wiki:/home/node/.wiki
+      - ./farm/data:/home/node/data
+    command: wiki --config /home/node/.wiki/config.json
+    restart: on-failure

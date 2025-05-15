@@ -1,0 +1,94 @@
+#!/bin/bash
+set -euo pipefail
+ITS=$'\n\r\t'
+
+usage() {
+  cat <<EOF
+Usage: $(basename $0) COMMAND
+
+COMMAND options:
+  create-user-account
+  configure-firewall
+  cleanup-after-one-click
+  update-repo
+EOF
+  exit 1
+}
+
+
+main() {
+  parse-args "$@"
+  $COMMAND
+}
+
+parse-args() {
+  case ${1:-UNSPECIFIED} in
+    create-user-account \
+    | configure-firewall \
+    | cleanup-after-one-click \
+    | update-repo \
+    )
+      readonly COMMAND=${1}
+      ;;
+
+    *)
+      readonly COMMAND=usage
+      ;;
+  esac
+}
+
+create-user-account() {
+  local PUBKEY=$(cat ~/.ssh/wiki-wiki/harvester-id_ecdsa.pub)
+  ssh wiki-wiki <<EOF
+if ! id harvester 2>/dev/null; then
+  useradd harvester --create-home --shell /bin/bash --groups sudo,docker
+else
+  echo "user account (harvester) already exists"
+fi
+
+if [ ! -d ~harvester/.ssh ]; then
+  mkdir ~harvester/.ssh
+  echo "$PUBKEY" > ~harvester/.ssh/authorized_keys
+  chown -R harvester:harvester ~harvester/.ssh
+  chmod 700 ~harvester/.ssh
+  chmod 600 ~harvester/.ssh/authorized_keys
+fi
+
+EOF
+}
+
+configure-firewall() {
+  ssh wiki-wiki <<EOF
+if ! ufw show added | grep -q 80; then
+  ufw limit 80
+fi
+
+if ! ufw show added | grep -q 443; then
+  ufw limit 443
+fi
+
+ufw status
+
+EOF
+}
+
+cleanup-after-one-click() {
+  ssh wiki-wiki <<EOF
+if [ -r /etc/update-motd.d/99-one-click ]; then
+  rm -rf /etc/update-motd.d/99-one-click
+fi
+EOF
+}
+
+update-repo() {
+  ssh harvester@wiki-wiki -i ~/.ssh/wiki-wiki/harvester-id_ecdsa <<EOF
+if [ ! -d ~/droplet-wiki-wiki ]; then
+  git clone https://github.com/dobbs/droplet-wiki-wiki.git
+else
+  cd droplet-wiki-wiki
+  git pull
+fi
+EOF
+}
+
+main "$@"

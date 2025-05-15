@@ -1,0 +1,9 @@
+{
+  auto_https disable_redirects
+  email {$LE_EMAIL}
+}
+
+{$URLS} {
+  encode gzip
+  reverse_proxy farm:3000
+}
