@@ -9,14 +9,15 @@ Usage: $(basename $0) IP_ADDR
 generate ssh key pairs with organized subdirectories of .ssh
 
   ~/.ssh/config
-    Include ~/.ssh/wiki-wiki/root-config
-  ~/.ssh/wiki-wiki/harvester-config
+    Include ~/.ssh/wiki-wiki/config
+    Include ~/.ssh/wiki-wiki/bootstrap-config
+  ~/.ssh/wiki-wiki/config
     Host wiki-wiki
       User harvester
       Hostname IP-ADDR
       IdentityFile ~/.ssh/wiki-wiki/harvester-id_ecdsa
-  ~/.ssh/wiki-wiki/root-config
-    Host wiki-wiki
+  ~/.ssh/wiki-wiki/bootstrap-config
+    Host bootstrap-wiki-wiki
       User root
       Hostname IP-ADDR
       IdentityFile ~/.ssh/wiki-wiki/root-id_ecdsa
@@ -45,33 +46,38 @@ ensure-directory() {
 }
 
 generate-configs() {
-  if ! grep -q "Include ${CONFIG_DIR}/root-config" ~/.ssh/config; then
-    printf "Include %s/root-config\n" ${CONFIG_DIR} >> ~/.ssh/config
+  if ! grep -q "Include ${CONFIG_DIR}/bootstrap-config" ~/.ssh/config; then
+    printf "Include %s/config\n" ${CONFIG_DIR} >> ~/.ssh/config
+    printf "Include %s/bootstrap-config\n" ${CONFIG_DIR} >> ~/.ssh/config
     chmod 600 ~/.ssh/config
   fi
-  if ! test -r ${CONFIG_DIR}/root-config; then
-    cat > ${CONFIG_DIR}/root-config <<EOF
-Host wiki-wiki
+  if ! test -r ${CONFIG_DIR}/bootstrap-config; then
+    cat > ${CONFIG_DIR}/bootstrap-config <<EOF
+Host bootstrap-wiki-wiki
   User root
   Hostname $IP_ADDR
   IdentityFile ${CONFIG_DIR}/root-id_ecdsa
 EOF
-    chmod 600 ${CONFIG_DIR}/root-config
+    chmod 600 ${CONFIG_DIR}/bootstrap-config
   fi
-  if ! test -r ${CONFIG_DIR}/harvester-config; then
-    cat > ${CONFIG_DIR}/harvester-config <<EOF
+  if ! test -r ${CONFIG_DIR}/config; then
+    cat > ${CONFIG_DIR}/config <<EOF
 Host wiki-wiki
   User harvester
   Hostname $IP_ADDR
   IdentityFile ${CONFIG_DIR}/harvester-id_ecdsa
 EOF
-    chmod 600 ${CONFIG_DIR}/harvester-config
+    chmod 600 ${CONFIG_DIR}/config
   fi
 }
 
 generate-keys() {
-  ssh-keygen -t ecdsa -b 521 -f ${CONFIG_DIR}/root-id_ecdsa
-  ssh-keygen -t ecdsa -b 521 -f ${CONFIG_DIR}/harvester-id_ecdsa
+  if [ ! -r ${CONFIG_DIR}/root-id_ecdsa ]; then
+    ssh-keygen -t ecdsa -b 521 -f ${CONFIG_DIR}/root-id_ecdsa
+  fi
+  if [ ! -r ${CONFIG_DIR}/harvester-id_ecdsa ]; then
+    ssh-keygen -t ecdsa -b 521 -f ${CONFIG_DIR}/harvester-id_ecdsa
+  fi
 }
 
 main "$@"

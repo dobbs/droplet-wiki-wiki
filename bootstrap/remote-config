@@ -39,9 +39,9 @@ parse-args() {
 
 create-user-account() {
   local PUBKEY=$(cat ~/.ssh/wiki-wiki/harvester-id_ecdsa.pub)
-  ssh wiki-wiki <<EOF
+  ssh bootstrap-wiki-wiki <<EOF
 if ! id harvester 2>/dev/null; then
-  useradd harvester --create-home --shell /bin/bash --groups sudo,docker
+  useradd harvester --create-home --shell /bin/bash --groups docker
 else
   echo "user account (harvester) already exists"
 fi
@@ -58,7 +58,7 @@ EOF
 }
 
 configure-firewall() {
-  ssh wiki-wiki <<EOF
+  ssh bootstrap-wiki-wiki <<EOF
 if ! ufw show added | grep -q 80; then
   ufw limit 80
 fi
@@ -73,7 +73,7 @@ EOF
 }
 
 cleanup-after-one-click() {
-  ssh wiki-wiki <<EOF
+  ssh bootstrap-wiki-wiki <<EOF
 if [ -r /etc/update-motd.d/99-one-click ]; then
   rm -rf /etc/update-motd.d/99-one-click
 fi
@@ -81,7 +81,7 @@ EOF
 }
 
 update-repo() {
-  ssh harvester@wiki-wiki -i ~/.ssh/wiki-wiki/harvester-id_ecdsa <<EOF
+  ssh wiki-wiki <<EOF
 if [ ! -d ~/droplet-wiki-wiki ]; then
   git clone https://github.com/dobbs/droplet-wiki-wiki.git
 else
