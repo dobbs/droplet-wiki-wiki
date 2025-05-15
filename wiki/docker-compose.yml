@@ -13,7 +13,7 @@ services:
     environment:
       LE_EMAIL: $LE_EMAIL
       URLS: $URLS
-    restart: on-failure
+    restart: unless-stopped
   farm:
     image: dobbs/farm:1.1.1
     init: true
@@ -21,4 +21,4 @@ services:
       - ./farm/.wiki:/home/node/.wiki
       - ./farm/data:/home/node/data
     command: wiki --config /home/node/.wiki/config.json
-    restart: on-failure
+    restart: unless-stopped
