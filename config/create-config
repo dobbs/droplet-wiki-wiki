@@ -1,0 +1,68 @@
+#!/bin/bash
+set -euo pipefail
+ITS=$'\n\r\t'
+
+usage() {
+  cat <<EOF
+Usage: $(basename $0) AUTHOR LE_EMAIL CONFIG_FILE
+
+create the CONFIG_FILE with the expected JSON structure
+
+  AUTHOR should be surrounded in quotes (e.g. "George McFly")
+
+  LE_EMAIL is the email address the server will use to issue TLS
+  certificates via Let's Encrypt
+
+  This script will also generate your wiki admin password and encrypt
+  those values so this config file can be published on the internet
+  where the deploy will be able to find it.
+
+EOF
+  exit 1
+}
+
+main() {
+  parse-args "$@" || usage
+
+  local CONFIG=$(jq \
+     --arg author "$AUTHOR" \
+     --arg secrets "$(encrypt-secrets)" \
+     '{
+  author: $author,
+  wikiDomains: [try .wikiDomains[]],
+  subdomains: [try .subdomains[]],
+  secrets: $secrets
+}' $CONFIG_FILE)
+  echo "$CONFIG" > $CONFIG_FILE
+
+  echoerr Admin password: $ADMIN_PW
+}
+
+echoerr() {
+  1>&2 printf "%s\n" "$*"
+}
+
+parse-args() {
+  readonly AUTHOR="${1:-UNSPECIFIED}"
+  readonly LE_EMAIL="${2:-UNSPECIFIED}"
+  readonly CONFIG_FILE="${3:-UNSPECIFIED}"
+  readonly ADMIN_PW=$(openssl rand -base64 24)
+
+  if grep -q UNSPECIFIED <<<"$AUTHOR\n$LE_EMAIL\n$CONFIG_FILE" ; then
+    return 1
+  else
+    return 0
+  fi
+}
+
+encrypt-secrets() {
+  jq -n \
+    --arg le "$LE_EMAIL" \
+    --arg pw "$ADMIN_PW" \
+    --arg cs $(openssl rand -base64 24) \
+  '{"LE_EMAIL": $le, "ADMIN":$pw,"COOKIE_SECRET":$cs}' \
+    | openssl pkeyutl -pubin -inkey ~/.ssh/wiki-wiki/config-secrets.pub -encrypt \
+    | base64
+}
+
+main "$@"

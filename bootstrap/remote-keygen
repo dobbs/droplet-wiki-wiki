@@ -1,0 +1,43 @@
+#!/bin/bash
+set -euo pipefail
+ITS=$'\n\r\t'
+
+usage() {
+  cat <<EOF
+Usage: $(basename $0) CONFIRM
+
+generate an rsa key pair in the remote harvester account for use encrypting secrets
+
+EOF
+  exit 1
+}
+
+main() {
+  parse-args "$@" || usage
+  generate-keys
+  copy-public-key
+}
+
+parse-args() {
+  readonly CONFIRMED="${1:-UNSPECIFIED}"
+  perl -e 'exit($ARGV[0] =~ qr{CONFIRM} ? 0 : 1)' $CONFIRMED
+}
+
+generate-keys() {
+  ssh wiki-wiki <<EOF
+if [ ! -r ~/.ssh/config-secrets.pem ]; then
+  openssl genrsa -out ~/.ssh/config-secrets.pem -passout pass:""
+  openssl rsa -in ~/.ssh/config-secrets.pem -out ~/.ssh/config-secrets.pub -pubout
+fi
+EOF
+}
+
+copy-public-key() {
+  if [ ! -r ~/.ssh/wiki-wiki/config-secrets.pub ]; then
+    echo
+    echo "Copying public key from wiki-wiki to ~/.ssh/wiki-wiki/config-secrets.pub"
+    scp wiki-wiki:.ssh/config-secrets.pub ~/.ssh/wiki-wiki/
+  fi
+}
+
+main "$@"
