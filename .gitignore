@@ -1,6 +1,6 @@
-/.env
 /deploy/CONFIG_URL
 /deploy/config.json
 /deploy/config-encrypted.json
-/farm/.wiki/config.json
-/farm/.wiki/owner.json
+/wiki/.env
+/wiki/farm/.wiki/config.json
+/wiki/farm/.wiki/owner.json

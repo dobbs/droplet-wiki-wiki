@@ -3,32 +3,39 @@ set -euo pipefail
 ITS=$'\n\r\t'
 
 main() {
-
   decrypt-config
   create-dot-env
   create-wiki-config-json
-
 }
 
 decrypt-config() {
-  jq --argjson "$(
-    jq .secrets deploy/config-encrypted.json \
-    | openssl pkeyutl -inkey ~/.ssh/config-secrets.pem -decrypt
-  )" '.LE_EMAIL = secrets.LE_EMAIL | .ADMIN = secrets.ADMIN | .COOKIE_SECRET = secrets.COOKIE_SECRET'  deploy/config-encrypted.json > deploy/config.json
+  jq --arg LE_EMAIL "$(decrypt-one-secret LE_EMAIL)" \
+     --arg ADMIN "$(decrypt-one-secret ADMIN)" \
+     --arg COOKIE_SECRET "$(decrypt-one-secret COOKIE_SECRET)" \
+     '.LE_EMAIL = $LE_EMAIL | .ADMIN = $ADMIN | .COOKIE_SECRET = $COOKIE_SECRET' \
+     deploy/config-encrypted.json > deploy/config.json
 }
 
 create-dot-env() {
-  jq -r '"LE_EMAIL=\"\(.LE_EMAIL)\""' deploy/config.json > .env
+  jq -r '"LE_EMAIL=\"\(.LE_EMAIL)\""' deploy/config.json > wiki/.env
   jq -r '"URLS=\"\(.subdomains | map("http://\(.) https://\(.)") | join(" "))\""' \
-    deploy/config.json >> .env
+    deploy/config.json >> wiki/.env
 }
 
 create-wiki-config-json() {
-  jq --argjson arg config/config.json '.admin = arg.ADMIN | .cookieSecret = arg.COOKIE_SECRET' \
-    farm/config/config.json > farm/.wiki/config.json
+  jq --argjson arg "$(cat deploy/config.json)" \
+    '.admin = $arg.ADMIN | .cookieSecret = $arg.COOKIE_SECRET' \
+    wiki/farm/config/config.json > wiki/farm/.wiki/config.json
 
-  jq --argjson arg config/config.json '.name = arg.author | .friend.secret = arg.ADMIN' \
-    farm/config/owner.json > farm/.wiki/owner.json
+  jq --argjson arg "$(cat deploy/config.json)" \
+    '.name = $arg.author | .friend.secret = $arg.ADMIN' \
+    wiki/farm/config/owner.json > wiki/farm/.wiki/owner.json
+}
+
+decrypt-one-secret() {
+  jq -r --arg KEY $1 '.secrets[$KEY]' deploy/config-encrypted.json \
+    | base64 -d \
+    | openssl pkeyutl -inkey ~/.ssh/config-secrets.pem -decrypt
 }
 
 main "$@"
