@@ -32,7 +32,7 @@ EOF
 
 parse-args() {
   readonly CONFIG_URL="${1:-UNSPECIFIED}"
-  if [ "$CONFIG" = "UNSPECIFIED" ] ; then
+  if [ "$CONFIG_URL" = "UNSPECIFIED" ] ; then
     return 1
   else
     return 0
