@@ -1,0 +1,42 @@
+#!/bin/bash
+set -euo pipefail
+ITS=$'\n\r\t'
+
+usage() {
+  cat <<EOF
+Usage: $(basename $0) CONFIG_URL
+
+Pull the source code
+Save the CONFIG_URL and a copy of the file at that URL
+Compile the runtime configuration into the needed places
+
+EOF
+  exit 1
+}
+
+main() {
+  parse-args "$@" || usage
+
+  ssh wiki-wiki <<EOF
+  git clone https://github.com/dobbs/droplet-wiki-wiki.git
+  cd droplet-wiki-wiki
+  echo "$CONFIG_URL" > ./deploy/CONFIG_URL
+  curl $CONFIG_URL > ./deploy/config-encrypted.json
+
+  ./deploy/compile-config
+
+  docker compose up -d
+EOF
+
+}
+
+parse-args() {
+  readonly CONFIG_URL="${1:-UNSPECIFIED}"
+  if [ "$CONFIG" = "UNSPECIFIED" ] ; then
+    return 1
+  else
+    return 0
+  fi
+}
+
+main "$@"

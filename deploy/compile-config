@@ -1,0 +1,34 @@
+#!/bin/bash
+set -euo pipefail
+ITS=$'\n\r\t'
+
+main() {
+
+  decrypt-config
+  create-dot-env
+  create-wiki-config-json
+
+}
+
+decrypt-config() {
+  jq --argjson "$(
+    jq .secrets deploy/config-encrypted.json \
+    | openssl pkeyutl -inkey ~/.ssh/config-secrets.pem -decrypt
+  )" '.LE_EMAIL = secrets.LE_EMAIL | .ADMIN = secrets.ADMIN | .COOKIE_SECRET = secrets.COOKIE_SECRET'  deploy/config-encrypted.json > deploy/config.json
+}
+
+create-dot-env() {
+  jq -r '"LE_EMAIL=\"\(.LE_EMAIL)\""' deploy/config.json > .env
+  jq -r '"URLS=\"\(.subdomains | map("http://\(.) https://\(.)") | join(" "))\""' \
+    deploy/config.json >> .env
+}
+
+create-wiki-config-json() {
+  jq --argjson arg config/config.json '.admin = arg.ADMIN | .cookieSecret = arg.COOKIE_SECRET' \
+    farm/config/config.json > farm/.wiki/config.json
+
+  jq --argjson arg config/config.json '.name = arg.author | .friend.secret = arg.ADMIN' \
+    farm/config/owner.json > farm/.wiki/owner.json
+}
+
+main "$@"
