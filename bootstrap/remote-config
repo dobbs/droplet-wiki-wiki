@@ -10,7 +10,6 @@ COMMAND options:
   create-user-account
   configure-firewall
   cleanup-after-one-click
-  update-repo
 EOF
   exit 1
 }
@@ -26,7 +25,6 @@ parse-args() {
     create-user-account \
     | configure-firewall \
     | cleanup-after-one-click \
-    | update-repo \
     )
       readonly COMMAND=${1}
       ;;
@@ -76,17 +74,6 @@ cleanup-after-one-click() {
   ssh bootstrap-wiki-wiki <<EOF
 if [ -r /etc/update-motd.d/99-one-click ]; then
   rm -rf /etc/update-motd.d/99-one-click
-fi
-EOF
-}
-
-update-repo() {
-  ssh wiki-wiki <<EOF
-if [ ! -d ~/droplet-wiki-wiki ]; then
-  git clone https://github.com/dobbs/droplet-wiki-wiki.git
-else
-  cd droplet-wiki-wiki
-  git pull
 fi
 EOF
 }
