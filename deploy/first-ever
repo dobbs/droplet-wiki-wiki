@@ -25,6 +25,7 @@ main() {
 
   ./deploy/compile-config
 
+  cd wiki
   docker compose up -d
 EOF
 

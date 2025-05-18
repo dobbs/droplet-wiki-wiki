@@ -15,9 +15,10 @@ EOF
 main() {
   parse-args "$@" || usage
 
-  jq --arg arg $SUBDOMAIN \
+  readonly CONFIG="$(jq --arg arg $SUBDOMAIN \
      '.subdomains = ([$arg, .subdomains[]] | unique)' \
-     $CONFIG_FILE
+     $CONFIG_FILE)"
+  echo "$CONFIG" > $CONFIG_FILE
 }
 
 parse-args() {
