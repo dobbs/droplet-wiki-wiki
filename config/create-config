@@ -24,20 +24,20 @@ EOF
 main() {
   parse-args "$@" || usage
 
-  local CONFIG=$(jq \
+  jq -n \
      --arg author "$AUTHOR" \
-     --argjson secrets "$(encrypt-secrets)" \
+     --arg LE_EMAIL $(encrypt-one-secret <<<"$LE_EMAIL") \
+     --arg ADMIN_PW $(encrypt-one-secret <<<"$ADMIN_PW") \
+     --arg COOKIE_SECRET $(openssl rand -base64 24 | encrypt-one-secret) \
      '{
   author: $author,
-  wikiDomains: [try .wikiDomains[]],
-  subdomains: [try .subdomains[]],
+  subdomains: [],
   secrets: {
-    LE_EMAIL: $secrets.LE_EMAIL,
-    ADMIN: $secrets.ADMIN,
-    COOKIE_SECRET: $secrets.COOKIE_SECRET
+    LE_EMAIL: $LE_EMAIL,
+    ADMIN: $ADMIN_PW,
+    COOKIE_SECRET: $COOKIE_SECRET
   }
-}' $CONFIG_FILE)
-  echo "$CONFIG" > $CONFIG_FILE
+}' > $CONFIG_FILE
 
   echoerr Admin password: $ADMIN_PW
 }
@@ -62,14 +62,6 @@ parse-args() {
 encrypt-one-secret() {
   openssl pkeyutl -pubin -inkey ~/.ssh/wiki-wiki/config-secrets.pub -encrypt \
     | base64
-}
-
-encrypt-secrets() {
-  jq -n \
-     --arg le $(encrypt-one-secret <<<"$LE_EMAIL") \
-     --arg pw $(encrypt-one-secret <<<"$ADMIN_PW") \
-     --arg cs $(openssl rand -base64 24 | encrypt-one-secret) \
-     '{"LE_EMAIL": $le, "ADMIN":$pw,"COOKIE_SECRET":$cs}'
 }
 
 main "$@"

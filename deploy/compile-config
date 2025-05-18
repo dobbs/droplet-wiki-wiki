@@ -23,8 +23,15 @@ create-dot-env() {
 }
 
 create-wiki-config-json() {
-  jq --argjson arg "$(jq '{ADMIN: .ADMIN, COOKIE_SECRET: .COOKIE_SECRET, wikiDomains: (.wikiDomains | map({"key":., "value":{"id":"/home/node/.wiki/owner.json"}}) | from_entries)}' deploy/config.json)" \
-    '.admin = $arg.ADMIN | .cookieSecret = $arg.COOKIE_SECRET | .wikiDomains = $arg.wikiDomains' \
+  jq --argjson arg "$(jq '.wikiDomains = (
+          [.subdomains[] | capture("\\.?(?<apex>\\w+\\.\\w+)$") | .apex ]
+          | unique
+          | map({\"key\":., \"value\":{\"id\":\"/home/node/.wiki/owner.json\"}})
+          | from_entries
+        )' deploy/config.json)" \
+    '.admin = $arg.ADMIN
+    | .cookieSecret = $arg.COOKIE_SECRET
+    | .wikiDomains = $arg.wikiDomains' \
     wiki/farm/config/config.json > wiki/farm/.wiki/config.json
 
   jq --argjson arg "$(cat deploy/config.json)" \
