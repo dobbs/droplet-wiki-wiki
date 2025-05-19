@@ -9,7 +9,7 @@ ITS=$'\n\r\t'
 
 main() {
 
-  ssh wiki-wiki <<EOF
+  ssh wiki-wiki <<'EOF'
   cd droplet-wiki-wiki
   git pull
 
