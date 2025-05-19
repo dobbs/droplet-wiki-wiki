@@ -1,0 +1,28 @@
+#!/bin/bash
+set -euo pipefail
+ITS=$'\n\r\t'
+
+# Pull the source code
+# Pull updated configuration from the CONFIG_URL
+# Compile the runtime configuration into the needed places
+# Restart
+
+main() {
+
+  ssh wiki-wiki <<EOF
+  cd droplet-wiki-wiki
+  git pull
+
+  readonly CONFIG_URL="$(cat ./deploy/CONFIG_URL)"
+  cp ./deploy/config-encrypted.json ./deploy/$(date -Is)-config-encrypted.json
+  curl $CONFIG_URL > ./deploy/config-encrypted.json
+
+  ./deploy/compile-config
+
+  cd wiki
+  docker compose restart
+EOF
+
+}
+
+main "$@"
