@@ -20,7 +20,7 @@ main() {
   ./deploy/compile-config
 
   cd wiki
-  docker compose restart
+  docker compose up -d  # should notice config changes and recreate containers
 EOF
 
 }
