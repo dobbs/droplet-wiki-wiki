@@ -15,7 +15,7 @@ services:
       URLS: $URLS
     restart: unless-stopped
   farm:
-    image: dobbs/farm:1.1.1
+    image: dobbs/farm:1.1.2
     init: true
     volumes:
       - ./farm/.wiki:/home/node/.wiki

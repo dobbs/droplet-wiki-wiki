@@ -32,7 +32,7 @@ Notes and code for a federated wiki farm hosted at digital ocean.
 
 ## C. create and publish the deploy configuration
 (we encrypt the secrets which needs another pair of keys)
-1. Generate an encryption key for runtime secrets
+1. Generate an encryption key for runtime secrets in the droplet user account
     ``` bash
     ssh-add ~/.ssh/wiki-wiki/harvester-id_ecdsa  # to reduce passphrase re-entry
     bootstrap/remote-keygen CONFIRM`
