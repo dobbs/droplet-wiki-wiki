@@ -1,5 +1,6 @@
 {
   auto_https disable_redirects
+  acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
   email {$LE_EMAIL}
 }
 
