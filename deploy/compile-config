@@ -20,11 +20,14 @@ create-dot-env() {
   jq -r '"LE_EMAIL=\"\(.LE_EMAIL)\""' deploy/config.json > wiki/.env
   jq -r '"URLS=\"\(.subdomains | map("http://\(.) https://\(.)") | join(" "))\""' \
     deploy/config.json >> wiki/.env
+  jq -r '"STAGING_URLS=\"\(.staging | map("http://\(.) https://\(.)") | join(" "))\""' \
+     deploy/config.json >> wiki/.env
 }
 
 create-wiki-config-json() {
   jq --argjson arg "$(jq '.wikiDomains = (
-          [.subdomains[] | capture("\\.?(?<apex>\\w+\\.\\w+)$") | .apex ]
+          [(.subdomains[],(.staging//[])[]) |
+             capture("\\.?(?<apex>\\w+\\.\\w+)$") | .apex ]
           | unique
           | map({"key":., "value":{"id":"/home/node/.wiki/owner.json"}})
           | from_entries

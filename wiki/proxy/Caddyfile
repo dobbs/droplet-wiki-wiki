@@ -1,10 +1,17 @@
 {
-  # acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
   auto_https disable_redirects
-  email {$LE_EMAIL}
 }
 
 {$URLS} {
+  tls {$LE_EMAIL}
+  encode gzip
+  reverse_proxy farm:3000
+}
+
+{$STAGING_URLS} {
+  tls {$LE_EMAIL} {
+    ca https://acme-staging-v02.api.letsencrypt.org/directory
+  }
   encode gzip
   reverse_proxy farm:3000
 }

@@ -13,6 +13,7 @@ services:
     environment:
       LE_EMAIL: $LE_EMAIL
       URLS: $URLS
+      STAGING_URLS: $STAGING_URLS
     restart: unless-stopped
   farm:
     image: dobbs/farm:1.1.2

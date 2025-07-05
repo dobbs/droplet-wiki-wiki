@@ -5,6 +5,7 @@
   "data": "/home/node/data",
   "security_type": "friends",
   "secure_cookie": true,
+  "allowed": "*",
   "wikiDomains": {
     "DOMAINS": {
       "id": "/home/node/.wiki/owner.json"
