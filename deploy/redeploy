@@ -20,6 +20,11 @@ main() {
   ./deploy/compile-config
 
   cd wiki
+  comm -23 \
+    <(jq -r '[.subdomains[],(.staging//[])[]] | sort | .[]' ../deploy/config.json) \
+    <(ls farm/data) \
+  | xargs -I % mkdir -p farm/data/%
+
   docker compose up -d  # should notice config changes and recreate containers
 EOF
 
