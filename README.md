@@ -114,3 +114,11 @@ deploy/first-ever CONFIG_URL  # replace CONFIG_URL with the URL from wherever yo
 
     double-check the ssh configuration and harvester key (same as step B.5 above):
     `ssh wiki-wiki -- echo Hello World`
+
+4. create a local copy of the configuration public key for encryption of runtime secrets
+    (this script prompts for the ssh password twice... irritating, but not worth
+    introducing the complexity to fix it.)
+    ```bash
+    cd ~/workspace/dobbs/droplet-wiki-wiki
+    bootstrap/remote-keygen CONFIRM
+    ```

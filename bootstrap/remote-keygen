@@ -6,7 +6,10 @@ usage() {
   cat <<EOF
 Usage: $(basename $0) CONFIRM
 
-generate an rsa key pair in the remote harvester account for use encrypting secrets
+Generate an rsa key pair, if none already exists, in the remote
+harvester account for use encrypting secrets.
+
+Also copies the public key onto the local workstation.
 
 EOF
   exit 1
