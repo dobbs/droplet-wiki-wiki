@@ -62,3 +62,55 @@ Notes and code for a federated wiki farm hosted at digital ocean.
 ``` bash
 deploy/first-ever CONFIG_URL  # replace CONFIG_URL with the URL from wherever you published the wiki configuration
 ```
+
+# Maintenance
+
+## SSH configuration to enable droplet management from a new workstation
+
+1. clone the repositories
+    ```bash
+    git clone git@github.com:dobbs/droplet-wiki-wiki ~/workspace/dobbs/droplet-wiki-wiki
+    git clone git@github.com:dobbs/config-wiki-wiki ~/workspace/dobbs/config-wiki-wiki
+    ```
+
+2. create an ssh config and related keys
+    follow the same instructions from step A.2 above including saving passphrases. Copy the Reserved IP from
+    the droplet details page on Digital Ocean's dashboard: https://cloud.digitalocean.com/droplets
+    ```bash
+    cd ~/workspace/dobbs/droplet-wiki-wiki
+    bootstrap/wiki-wiki-keygen IP_ADDR
+    ```
+
+3. authorize the new public keys on the droplet
+    copy the root **public key** from your workstation (the .pub suffix really matters!)
+    ```bash
+    # this instruction assumes MacOS
+    pbcopy <~/.ssh/wiki-wiki/root-id_ecdsa.pub
+    ```
+
+    use the droplet console from your web browser to authorize the root public key
+    ```bash
+    vi ~/.ssh/authorized_keys
+    # open a new line. paste the public key. save the file and exit vi. close the console
+    ```
+
+    double-check the ssh config and root key from your workstation. also switch to harvester account
+    ```bash
+    ssh bootstrap-wiki-wiki
+    su - harvester
+    ```
+
+    copy the harvester **public key** from your workstation (reminder .pub suffix matters!)
+    ```bash
+    # this instruction assumes MacOS
+    pbcopy <~/.ssh/wiki-wiki/harvester-id_ecdsa.pub
+    ```
+
+    authorize the harvester public key
+    ```bash
+    vi ~/.ssh/authorized_keys
+    # open a new line. paste the public key. save the file and exit vi. exit the su - shell. exit the ssh.
+    ```
+
+    double-check the ssh configuration and harvester key (same as step B.5 above):
+    `ssh wiki-wiki -- echo Hello World`
