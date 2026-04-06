@@ -1,0 +1,35 @@
+#!/bin/bash
+set -euo pipefail
+ITS=$'\n\r\t'
+
+usage() {
+  cat <<EOF
+Usage: $(basename $0) CONFIG_FILE IMAGE
+
+set the IMAGE in the CONFIG_FILE
+
+EOF
+  exit 1
+}
+
+main() {
+  parse-args "$@" || usage
+
+  readonly CONFIG="$(jq --arg arg $IMAGE \
+     '.image = $arg' \
+     $CONFIG_FILE)"
+  echo "$CONFIG" > $CONFIG_FILE
+}
+
+parse-args() {
+  readonly CONFIG_FILE="${1:-UNSPECIFIED}"
+  readonly IMAGE="${2:-UNSPECIFIED}"
+
+  if grep -q UNSPECIFIED <<<"$CONFIG_FILE\n$IMAGE" ; then
+    return 1
+  else
+    return 0
+  fi
+}
+
+main "$@"

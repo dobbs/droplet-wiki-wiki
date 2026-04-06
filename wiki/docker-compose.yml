@@ -16,7 +16,7 @@ services:
       STAGING_URLS: $STAGING_URLS
     restart: unless-stopped
   farm:
-    image: dobbs/farm:1.2.1
+    image: $IMAGE
     init: true
     volumes:
       - ./farm/.wiki:/home/node/.wiki

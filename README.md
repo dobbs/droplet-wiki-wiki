@@ -43,12 +43,17 @@ Notes and code for a federated wiki farm hosted at digital ocean.
    # config/create-config AUTHOR LE_EMAIL CONFIG_FILE
    config/create-config "Old MacDonald" "o.macdonald@example.com" ../config-wiki-wiki/wiki.example.com.json
    ```
-3. Add a domain name to the wiki config
+3. Set the docker image in the wiki config
+   (this is a step that you'll do again when you update the container image for your farm)
+   ```bash
+   config/set-image ../config-wiki-wiki/wiki.example.com.json dobbs/farm:1.2.1
+   ```
+4. Add a domain name to the wiki config
    (this is a step that you'll do again when you add a new wiki to your farm)
    ``` bash
    config/add-subdomain ../config-wiki-wiki/wiki.example.com.json wiki.example.com
    ```
-4. Publish the wiki config
+5. Publish the wiki config
    I'm using GitHub Pages to publish my config. This lets me use version control for my configuration. You could too, from a fork of the config repo.
    ``` bash
    pushd ../config-wiki-wiki
@@ -57,10 +62,16 @@ Notes and code for a federated wiki farm hosted at digital ocean.
    git push
    popd
    ```
+6. Make sure the domain name resolves before deploying
+   I configure CNAME records using Digital Ocean's dashboard: https://cloud.digitalocean.com/networking/domains
+   I confirm the CNAME is active with this command:
+   ```bash
+   dig +short wiki.example.com
+   ```
 
 ## D. deploy the wiki
 ``` bash
-deploy/first-ever CONFIG_URL  # replace CONFIG_URL with the URL from wherever you published the wiki configuration
+deploy/first-ever CONFIG_URL  # replace CONFIG_URL with wherever you published the wiki configuration
 ```
 
 # Maintenance

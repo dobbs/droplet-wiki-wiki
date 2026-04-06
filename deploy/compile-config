@@ -22,6 +22,7 @@ create-dot-env() {
     deploy/config.json >> wiki/.env
   jq -r '"STAGING_URLS=\"\(.staging | map("http://\(.) https://\(.)") | join(" "))\""' \
      deploy/config.json >> wiki/.env
+  jq -r '"IMAGE=\"\(.image)\""' deploy/config.json >> wiki/.env
 }
 
 create-wiki-config-json() {
