@@ -1,6 +1,6 @@
 services:
   caddy:
-    image: caddy:2.10.0-alpine
+    image: caddy:2.11.4-alpine
     init: true
     volumes:
       - ./proxy/Caddyfile:/etc/caddy/Caddyfile
