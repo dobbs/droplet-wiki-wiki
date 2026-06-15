@@ -12,7 +12,8 @@ services:
       - "443:443"
     environment:
       LE_EMAIL: $LE_EMAIL
-      URLS: $URLS
+      SITE_URLS: $SITE_URLS
+      WIKI_URLS: $WIKI_URLS
       STAGING_URLS: $STAGING_URLS
     restart: unless-stopped
   farm:

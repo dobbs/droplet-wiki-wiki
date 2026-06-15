@@ -2,7 +2,12 @@
   auto_https disable_redirects
 }
 
-{$URLS} {
+{$SITE_URLS} {
+  root * /srv/{host}/docs
+  file_server
+}
+
+{$WIKI_URLS} {
   tls {$LE_EMAIL}
   encode gzip
   reverse_proxy farm:3000

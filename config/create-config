@@ -31,7 +31,9 @@ main() {
      --arg COOKIE_SECRET $(openssl rand -base64 24 | encrypt-one-secret) \
      '{
   author: $author,
+  sites: [],
   subdomains: [],
+  staging: [],
   secrets: {
     LE_EMAIL: $LE_EMAIL,
     ADMIN: $ADMIN_PW,
